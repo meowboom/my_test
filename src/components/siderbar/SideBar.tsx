@@ -3,31 +3,32 @@
 import {
   ArrowRightLeft,
   Bitcoin,
-  Bot,
   ChartCandlestick,
   ChartPie,
-  ChevronsLeft,
-  ChevronsRight,
   CirclePlus,
   Clock,
   CloudLightning,
-  Gamepad2,
   Grip,
   LayoutDashboard,
-  LogIn,
-  LogOut,
-  Send,
+  PanelLeftOpen,
+  PanelRightOpen,
   Wallet,
   Waypoints,
-  X,
   Zap,
 } from "lucide-react";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
+import SocialMedia from "../ui/socialmedia";
 
 interface ISideBar {}
 
 const SideBar: FC<ISideBar> = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    if (isOpen) return setIsVisible(false);
+  }, [isOpen]);
+  console.log(isVisible);
+
   return (
     <div className="fixed left-10 top-1/2 transform -translate-y-1/2 h-3/4 bg-primaryBg text-primaryText text-xl rounded-3xl flex flex-col gap-4 justify-between px-6 py-12">
       <section className="w-full flex gap-4 items-center justify-center">
@@ -132,9 +133,9 @@ const SideBar: FC<ISideBar> = () => {
           } w-full duration-300 ease-in-out cursor-pointer flex gap-4  items-center hover:bg-primaryBlue hover:text-secondaryText rounded-xl py-1 px-2`}
         >
           {isOpen ? (
-            <LogIn className="size-7" />
+            <PanelRightOpen className="size-7" />
           ) : (
-            <LogOut className="size-7" />
+            <PanelLeftOpen className="size-7" />
           )}
           {isOpen && <h4>Collapse sidebar</h4>}
         </div>
@@ -142,22 +143,23 @@ const SideBar: FC<ISideBar> = () => {
       <section className="flex justify-center items-center">
         <div className="flex justify-center items-center gap-3">
           {isOpen ? (
-            <>
-              <div className="cursor-pointer shadow-sm hover:shadow-secondaryText/50 duration-300 flex items-center justify-center border-2 rounded-2xl p-2 border-sky-900/70">
-                <Send className="size-9 stroke-1 pr-1 pt-1 text-zinc-900/30 fill-sky-600" />
-              </div>
-              <div className="cursor-pointer shadow-sm hover:shadow-secondaryText/50 duration-300 flex items-center justify-center border-2 rounded-2xl p-2 border-sky-900/70">
-                <X className="border size-9 p-1 rounded-full bg-zinc-950/70 text-secondaryText border-zinc-950/70 text-center" />
-              </div>
-              <div className="cursor-pointer shadow-sm hover:shadow-secondaryText/50 duration-300 flex items-center justify-center border-2 rounded-2xl p-2 border-sky-900/70">
-                <Gamepad2 className="size-9 rounded-full  text-[#cb41ae]  text-center" />
-              </div>
-              <div className="cursor-pointer shadow-sm hover:shadow-secondaryText/50 duration-300 flex items-center justify-center border-2 rounded-2xl p-2 border-sky-900/70">
-                <Bot className="size-9 rounded-full  text-[#e47248]  text-center" />
-              </div>
-            </>
+            <SocialMedia />
           ) : (
-            <Grip className="size-10 hover:text-secondaryText duration-300 ease-in-out cursor-pointer" />
+            <div>
+              <Grip
+                onClick={() => setIsVisible(!isVisible)}
+                className="size-10 hover:text-secondaryText duration-300 ease-in-out cursor-pointer"
+              />
+              {isVisible ? (
+                <div className="relative">
+                  <div className="absolute flex -top-12 left-16 bg-primaryBg p-2 pr-4 gap-2 rounded-r-2xl  ">
+                    <SocialMedia />
+                  </div>
+                </div>
+              ) : (
+                ""
+              )}
+            </div>
           )}
         </div>
       </section>
