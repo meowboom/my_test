@@ -1,6 +1,6 @@
 "use client";
+
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -17,6 +17,7 @@ import {
 
 import React, { useRef, useState } from "react";
 import { LabelList, Pie, PieChart } from "recharts";
+import { getRandomColor } from "./helper";
 
 const page = () => {
   const [aboutChart, setAboutChart] = useState({
@@ -57,21 +58,51 @@ const page = () => {
   const activesRef = useRef<HTMLInputElement>(null);
   const amountActiveRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
-  // const addToChartData = () => setAboutChart((prev)=>prev.chartData.map(({amount,assets,value})=>{if(assets!==activesRef.current?.value){
-  //   return prev.chartData.push({
-  //     assets:activesRef.current?.value,
-  //     value:amountRef.current?.value,
-  //     amount:amountActiveRef.current?.value
-  //     fill:"#fff"
-  //   })
-  // }}));
+
+  const addToChartData = () => {
+    setAboutChart((prev) => {
+      const updatedChartData = prev.chartData.map((item) => {
+        if (
+          item.assets.toLowerCase() === activesRef.current?.value?.toLowerCase()
+        ) {
+          return {
+            ...item,
+            value: item.value + Number(amountRef.current?.value) || 0,
+            amount: item.amount + Number(amountActiveRef.current?.value) || 0,
+          };
+        }
+        return item;
+      });
+
+      const exists = prev.chartData.some(
+        ({ assets }) =>
+          assets.toLowerCase() === activesRef.current?.value?.toLowerCase()
+      );
+
+      if (!exists) {
+        const newAsset = {
+          assets: activesRef.current?.value || "",
+          value: Number(amountRef.current?.value) || 0,
+          amount: Number(amountActiveRef.current?.value) || 0,
+          fill: getRandomColor(),
+        };
+        return {
+          ...prev,
+          chartData: [...prev.chartData, newAsset],
+        };
+      }
+      return {
+        ...prev,
+        chartData: updatedChartData,
+      };
+    });
+    if (amountActiveRef.current) amountActiveRef.current.value = "0";
+    if (amountRef.current) amountRef.current.value = "0";
+  };
 
   return (
     <div className="flex flex-col items-center h-full ">
       <div className="relative w-full h-1/2 flex flex-col justify-start">
-        <div className="w-full text-center py-2">
-          Switcher All/Crypto/Traditional
-        </div>
         <div className="w-full h-5/6">
           <ChartContainer
             config={aboutChart.chartConfig}
@@ -114,7 +145,8 @@ const page = () => {
                 <TableHead className="text-center">Amount</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="">
+            
               {aboutChart.chartData.map(({ assets, fill, value, amount }) => (
                 <TableRow key={value} className="text-lg">
                   <TableCell className={`text-[${fill}]`}>{assets}</TableCell>
@@ -153,7 +185,10 @@ const page = () => {
                   />
                 </TableCell>
                 <TableCell>
-                  <button className="py-1 px-3 rounded-lg bg-[#49c049] text-zinc-800 hover:bg-primaryGreen transition duration-300">
+                  <button
+                    onClick={addToChartData}
+                    className="py-1 px-3 rounded-lg bg-[#49c049] text-zinc-800 hover:bg-primaryGreen transition duration-300"
+                  >
                     Add
                   </button>
                 </TableCell>
