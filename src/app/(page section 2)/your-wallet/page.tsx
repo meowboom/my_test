@@ -1,11 +1,6 @@
 "use client";
 
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import {
   Table,
   TableBody,
   TableCaption,
@@ -15,121 +10,53 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import React, { useRef, useState } from "react";
-import { LabelList, Pie, PieChart } from "recharts";
-import { getRandomColor } from "./helper";
+import React, { useState } from "react";
+import { COINS_COLOR, COINS_TICKER, getRandomColor, MY_WALLET } from "./helper";
+import CoinCurrentPrice from "@/components/coin_current_price/CoinCurrentPrice";
+import ChartWallet from "./(ui)/chart_wallet";
 
 const page = () => {
-  const [aboutChart, setAboutChart] = useState({
-    chartData: [
-      { assets: "BTC", value: 4000, amount: 500, fill: "#FD7F20" },
-      { assets: "ETH", value: 2000, amount: 100, fill: "#FC2E20" },
-      { assets: "XRP", value: 8000, amount: 245, fill: "#5DF15D" },
-      { assets: "TON", value: 5000, amount: 330, fill: "#AE388B" },
-      { assets: "UNI", value: 500, amount: 90, fill: "#11A7BB" },
-    ],
+  const [myPortfolio, setMyPortfolio] = useState({
+    chartData: MY_WALLET,
     chartConfig: {
       amount: {
-        label: "Amount",
+        label: "Ticker",
       },
       BTC: {
-        label: "BTC",
-        color: "#FD7F20",
+        label: COINS_TICKER.BTC,
+        color: COINS_COLOR.BTC,
       },
       ETH: {
-        label: "ETH",
-        color: "#FC2E20",
+        label: COINS_TICKER.ETH,
+        color: COINS_COLOR.ETH,
       },
       XRP: {
-        label: "XRP",
-        color: "#5DF15D",
+        label: COINS_TICKER.XRP,
+        color: COINS_COLOR.XRP,
       },
       TON: {
-        label: "TON",
-        color: "#AE388B",
+        label: COINS_TICKER.TON,
+        color: COINS_COLOR.TON,
       },
       UNI: {
-        label: "UNI",
-        color: "#11A7BB",
+        label: COINS_TICKER.UNI,
+        color: COINS_COLOR.UNI,
       },
     },
   });
 
-  const activesRef = useRef<HTMLInputElement>(null);
-  const amountActiveRef = useRef<HTMLInputElement>(null);
-  const amountRef = useRef<HTMLInputElement>(null);
-
-  const addToChartData = () => {
-    setAboutChart((prev) => {
-      const updatedChartData = prev.chartData.map((item) => {
-        if (
-          item.assets.toLowerCase() === activesRef.current?.value?.toLowerCase()
-        ) {
-          return {
-            ...item,
-            value: item.value + Number(amountRef.current?.value) || 0,
-            amount: item.amount + Number(amountActiveRef.current?.value) || 0,
-          };
-        }
-        return item;
-      });
-
-      const exists = prev.chartData.some(
-        ({ assets }) =>
-          assets.toLowerCase() === activesRef.current?.value?.toLowerCase()
-      );
-
-      if (!exists) {
-        const newAsset = {
-          assets: activesRef.current?.value || "",
-          value: Number(amountRef.current?.value) || 0,
-          amount: Number(amountActiveRef.current?.value) || 0,
-          fill: getRandomColor(),
-        };
-        return {
-          ...prev,
-          chartData: [...prev.chartData, newAsset],
-        };
-      }
-      return {
-        ...prev,
-        chartData: updatedChartData,
-      };
-    });
-    if (amountActiveRef.current) amountActiveRef.current.value = "0";
-    if (amountRef.current) amountRef.current.value = "0";
-  };
-
   return (
     <div className="flex flex-col items-center h-full ">
-      <div className="relative w-full h-1/2 flex flex-col justify-start">
+      <div className="relative w-full h-1/2 flex justify-start items-center">
         <div className="w-full h-5/6">
-          <ChartContainer
-            config={aboutChart.chartConfig}
-            className="mx-auto aspect-square h-full"
-          >
-            <PieChart>
-              <ChartTooltip
-                content={<ChartTooltipContent nameKey="assets" hideLabel />}
-              />
-              <Pie
-                data={aboutChart.chartData}
-                dataKey="value"
-                nameKey="assets"
-                fill="fill"
-              >
-                <LabelList
-                  dataKey="assets"
-                  stroke="none"
-                  fontSize={12}
-                  formatter={(value: keyof typeof aboutChart.chartConfig) =>
-                    aboutChart.chartConfig[value]?.label
-                  }
-                />
-              </Pie>
-            </PieChart>
-          </ChartContainer>
+          {/* Chart */}
+          <ChartWallet
+            chartConfig={myPortfolio.chartConfig}
+            chartData={myPortfolio.chartData}
+          />
         </div>
+        {/* Coin Actual Price */}
+        <CoinCurrentPrice />
       </div>
       <div className=" w-full h-1/2 flex flex-col justify-center">
         <div className="w-full text-center text-2xl text-secondaryText/50 py-2">
@@ -142,16 +69,20 @@ const page = () => {
               <TableRow className="text-center text-xl text-primaryText">
                 <TableHead className="text-center">Actives</TableHead>
                 <TableHead className="text-center">Amount actives</TableHead>
-                <TableHead className="text-center">Amount</TableHead>
+                <TableHead className="text-center">Amount in USD</TableHead>
+                <TableHead className="text-center">Buy price</TableHead>
+                <TableHead className="text-center">%</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="">
-            
-              {aboutChart.chartData.map(({ assets, fill, value, amount }) => (
+              {myPortfolio.chartData.map(({ assets, fill, value, amount }) => (
                 <TableRow key={value} className="text-lg">
                   <TableCell className={`text-[${fill}]`}>{assets}</TableCell>
-                  <TableCell>{amount}</TableCell>
+                  <TableCell>byu price/value</TableCell>
                   <TableCell>{value}</TableCell>
+                  <TableCell>Buy price</TableCell>
+                  <TableCell>% count</TableCell>
+
                   <TableCell>
                     <button className="py-1 px-3 rounded-lg bg-[#F3161E]/60 text-zinc-800 hover:bg-[#F3161E]/90 transition duration-300">
                       Remove
@@ -162,7 +93,6 @@ const page = () => {
               <TableRow className="text-lg hover:bg-transparent">
                 <TableCell>
                   <input
-                    ref={activesRef}
                     type="text"
                     placeholder="BTC"
                     className="placeholder:text-secondaryGray p-1 overflow-hidden bg-primaryBg/20 w-24 text-center rounded-lg outline-none"
@@ -170,7 +100,6 @@ const page = () => {
                 </TableCell>
                 <TableCell>
                   <input
-                    ref={amountActiveRef}
                     type="number"
                     placeholder="0.2234"
                     className="placeholder:text-secondaryGray p-1 overflow-hidden bg-primaryBg/20 w-24 text-center rounded-lg outline-none"
@@ -178,7 +107,20 @@ const page = () => {
                 </TableCell>
                 <TableCell>
                   <input
-                    ref={amountRef}
+                    type="number"
+                    placeholder="3999"
+                    className="placeholder:text-secondaryGray p-1 overflow-hidden bg-primaryBg/20 w-24 text-center rounded-lg outline-none"
+                  />
+                </TableCell>
+                <TableCell>
+                  <input
+                    type="number"
+                    placeholder="3999"
+                    className="placeholder:text-secondaryGray p-1 overflow-hidden bg-primaryBg/20 w-24 text-center rounded-lg outline-none"
+                  />
+                </TableCell>
+                <TableCell>
+                  <input
                     type="number"
                     placeholder="3999"
                     className="placeholder:text-secondaryGray p-1 overflow-hidden bg-primaryBg/20 w-24 text-center rounded-lg outline-none"
@@ -186,7 +128,7 @@ const page = () => {
                 </TableCell>
                 <TableCell>
                   <button
-                    onClick={addToChartData}
+                    // onClick={first}
                     className="py-1 px-3 rounded-lg bg-[#49c049] text-zinc-800 hover:bg-primaryGreen transition duration-300"
                   >
                     Add
